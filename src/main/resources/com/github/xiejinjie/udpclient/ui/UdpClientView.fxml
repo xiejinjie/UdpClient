@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.geometry.Insets?>
+<VBox stylesheets="@UdpClientView.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.github.xiejinjie.udpclient.ui.UdpClientController">
+    <VBox id="formBox" maxWidth="450">
+        <VBox.margin>
+            <Insets top="30" left="25"/>
+        </VBox.margin>
+        <GridPane vgap="15">
+            <VBox.margin>
+                <Insets top="20" bottom="20"/>
+            </VBox.margin>
+            <VBox GridPane.rowIndex="0" GridPane.columnIndex="0" prefWidth="60" alignment="CENTER_RIGHT">
+                <Label text="发送地址"/>
+            </VBox>
+            <VBox GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="140">
+                <TextField fx:id="hostField" maxHeight="100"/>
+            </VBox>
+
+            <VBox GridPane.rowIndex="0" GridPane.columnIndex="2" prefWidth="60" alignment="CENTER_RIGHT">
+                <Label text="端口"/>
+            </VBox>
+            <VBox GridPane.rowIndex="0" GridPane.columnIndex="3" prefWidth="140">
+                <TextField fx:id="portField" maxHeight="100"/>
+            </VBox>
+            <VBox GridPane.rowIndex="1" GridPane.columnIndex="0" alignment="CENTER_RIGHT">
+                <Label text="发送消息"/>
+            </VBox>
+            <VBox GridPane.rowIndex="1" GridPane.columnIndex="1"  GridPane.columnSpan="3">
+                <TextArea fx:id="sendText" maxWidth="350" maxHeight="100" wrapText="true"/>
+            </VBox>
+            <VBox GridPane.rowIndex="2" GridPane.columnIndex="0">
+                <Label text="接收返回"/>
+            </VBox>
+            <HBox GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.columnSpan="3" spacing="10">
+                <RadioButton fx:id="hasReturn" text="是"/>
+                <RadioButton fx:id="hasNoReturn" text="否"/>
+            </HBox>
+            <VBox GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="4" alignment="CENTER">
+                <Button onAction="#sendUdpPacket" maxWidth="200" text="发送"/>
+            </VBox>
+
+        </GridPane>
+        <GridPane vgap="15">
+            <VBox GridPane.rowIndex="0" GridPane.columnIndex="0" prefWidth="60">
+                <Label text="返回消息"/>
+            </VBox>
+            <VBox GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="340">
+                <TextArea fx:id="receiveText" maxWidth="350" maxHeight="100" wrapText="true"/>
+            </VBox>
+        </GridPane>
+    </VBox>
+</VBox>

@@ -1,0 +1,38 @@
+/* 根容器样式 */
+/*VBox {
+    -fx-spacing: 2; *//* 设置元素之间的间距 *//*
+    -fx-padding: 2; *//* 设置容器内边距 */
+}
+
+/* 标签样式 */
+Label {
+    -fx-text-fill: #333; /* 文本颜色 */
+}
+GridPane {
+    -fx-padding: 5
+}
+
+GridPane VBox {
+    -fx-padding: 5
+}
+GridPane HBox {
+    -fx-padding: 5
+}
+GridPane .shortField {
+    -fx-max-width: 100
+}
+GridPane .longField {
+    -fx-max-width: 250
+}
+#formBox {
+    -fx-border-color: gray;  /* 设置边框颜色 */
+    -fx-border-width: 1px;    /* 设置边框宽度 */
+    -fx-padding: 5px 5px 5px 0px;
+}
+
+#buttonBox {
+    -fx-padding: 0px 0px 0px 40px;
+}
+#buttonBox Button {
+    -fx-max-width: 120
+}
