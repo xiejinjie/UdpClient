@@ -1,10 +1,10 @@
 package com.github.xiejinjie.udpclient.ui;
 
 import com.github.xiejinjie.udpclient.business.service.IUdpClientService;
-import com.github.xiejinjie.udpclient.common.CommonThreadPool;
 import com.github.xiejinjie.udpclient.util.SocketUtil;
 import com.github.xiejinjie.udpclient.util.SpringUtil;
 import com.github.xiejinjie.udpclient.util.StringUtils;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -53,7 +53,7 @@ public class UdpClientController implements Initializable {
 
     @FXML
     private void sendUdpPacket() {
-        CommonThreadPool.threadPool.execute(() -> {
+        Platform.runLater(() -> {
             if (!checkParam()) {
                 logger.warn("参数不合法");
                 return;

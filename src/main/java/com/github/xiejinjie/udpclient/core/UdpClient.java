@@ -1,10 +1,10 @@
 package com.github.xiejinjie.udpclient.core;
 
-import com.github.xiejinjie.udpclient.util.JsonUtil;
-import com.github.xiejinjie.udpclient.util.SocketUtil;
 import com.github.xiejinjie.udpclient.message.Message;
 import com.github.xiejinjie.udpclient.message.MessageBuilder;
 import com.github.xiejinjie.udpclient.message.MessageUtil;
+import com.github.xiejinjie.udpclient.util.JsonUtil;
+import com.github.xiejinjie.udpclient.util.SocketUtil;
 import com.github.xiejinjie.udpclient.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * UdpClient
+ * test.UdpClient
  * 编写一个UdpClient,支持界面和指令行操作
  * 可以向指定ip和端口，可以设置UDP包消息体，设置UDP包的个数和间隔，有返回和无返回
  *
@@ -59,16 +59,16 @@ public class UdpClient {
         messageBuilder.setRequestId("00000001");
         messageBuilder.addTlv(35, 0, 1);
         messageBuilder.addTlv(36, "127.0.0.1");
-        messageBuilder.addTlv(30, "123456789");
+        messageBuilder.addTlv(30, "12345678");
         Message msg = messageBuilder.build();
         return MessageUtil.convertMessageToByteArray(msg);
     }
 
     public static byte[] buildConfigQueryMsg() {
         MessageBuilder messageBuilder = new MessageBuilder();
-        messageBuilder.setType(38);
+        messageBuilder.setType(36);
         messageBuilder.setRequestId("00000001");
-        messageBuilder.addTlv(30, "123456789");
+        messageBuilder.addTlv(30, "CESHI_1");
         Message msg = messageBuilder.build();
         return MessageUtil.convertMessageToByteArray(msg);
     }
