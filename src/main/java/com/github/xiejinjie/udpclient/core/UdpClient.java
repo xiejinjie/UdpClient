@@ -66,7 +66,7 @@ public class UdpClient {
 
     public static byte[] buildConfigQueryMsg() {
         MessageBuilder messageBuilder = new MessageBuilder();
-        messageBuilder.setType(30);
+        messageBuilder.setType(36);
         messageBuilder.setRequestId("00000001");
         messageBuilder.addTlv(30, "CESHI_1");
         Message msg = messageBuilder.build();
