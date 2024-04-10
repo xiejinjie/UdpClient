@@ -2,6 +2,7 @@ package com.github.xiejinjie.udpclient.core;
 
 import com.github.xiejinjie.udpclient.message.Message;
 import com.github.xiejinjie.udpclient.message.MessageBuilder;
+import com.github.xiejinjie.udpclient.message.MessageTlv;
 import com.github.xiejinjie.udpclient.message.MessageUtil;
 import com.github.xiejinjie.udpclient.util.JsonUtil;
 import com.github.xiejinjie.udpclient.util.SocketUtil;
@@ -13,7 +14,9 @@ import org.springframework.stereotype.Component;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,8 +31,14 @@ import java.util.Map;
 public class UdpClient {
     private static Logger logger = LoggerFactory.getLogger(UdpClient.class);
 
-    public static void main(String[] args) {
-        byte[] msg = buildConfigQueryMsg();
+    public static void main(String[] args) throws InterruptedException {
+        byte[] msg = buildTaskQueryMsg();
+        System.out.println(SocketUtil.bytesToHexString(msg));
+        sendUdpPacket("127.0.0.1", 10808, msg);
+
+        Thread.sleep(1000);
+
+        msg = buildTaskNotifyMsg();
         System.out.println(SocketUtil.bytesToHexString(msg));
         sendUdpPacket("127.0.0.1", 10808, msg);
     }
@@ -80,6 +89,30 @@ public class UdpClient {
         messageBuilder.addTlv(30, "123456789");
         messageBuilder.addTlv(32, "192.168.101.100");
         messageBuilder.addTlv(49, "AA::CC");
+
+        Message msg = messageBuilder.build();
+        return MessageUtil.convertMessageToByteArray(msg);
+    }
+
+    public static byte[] buildTaskQueryMsg() {
+        MessageBuilder messageBuilder = new MessageBuilder();
+        messageBuilder.setType(38);
+        messageBuilder.setRequestId("00000001");
+        messageBuilder.addTlv(30, "CPE-20204021528");
+
+        Message msg = messageBuilder.build();
+        return MessageUtil.convertMessageToByteArray(msg);
+    }
+
+    public static byte[] buildTaskNotifyMsg() {
+        MessageBuilder messageBuilder = new MessageBuilder();
+        messageBuilder.setType(39);
+        messageBuilder.setRequestId("00000001");
+        messageBuilder.addTlv(30, "CPE-20204021528");
+        List<MessageTlv> list = new ArrayList<>();
+        list.add(new MessageTlv(12, 2, 1));
+        list.add(new MessageTlv(1, 0, 1));
+        messageBuilder.addTlv(10, MessageUtil.convertTlvListToByteArray(list));
 
         Message msg = messageBuilder.build();
         return MessageUtil.convertMessageToByteArray(msg);

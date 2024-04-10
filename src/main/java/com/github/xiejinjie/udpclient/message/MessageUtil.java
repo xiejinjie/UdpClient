@@ -6,13 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.github.xiejinjie.udpclient.message.MessageConstant.*;
 
 /**
  * MessageUtil
@@ -30,22 +29,46 @@ public class MessageUtil {
      * @return 消息对象
      */
     public static Message parseMessage(byte[] msgBytes) {
+        if (msgBytes == null) {
+            return null;
+        }
         int index = 0;
-        Message message = new Message();
-        // type
-        message.setType(msgBytes[index] & 0xFF);
-        index += MessageConstant.MSG_TYPE_LEN;
-        // request id
-        message.setRequestId(SocketUtil.bytesToHexString(msgBytes, index, MessageConstant.MSG_REQUEST_ID_LEN));
-        index += MessageConstant.MSG_REQUEST_ID_LEN;
-        // len
-        int len = byteArrayToInt(msgBytes, index, MessageConstant.MSG_TLV_PART_LEN);
-        message.setLen(len);
-        index += MessageConstant.MSG_TLV_PART_LEN;
-        // tlv
-        List<MessageTlv> tlvList = parseTlvList(msgBytes, index, len);
-        message.setTlvList(tlvList);
-        return message;
+        try {
+            Message message;
+            // type
+            int type = msgBytes[index] & 0xFF;
+            if (type == MSG_TYPE_RESP) {
+                message = new MessageResp();
+            } else {
+                message = new Message();
+            }
+            message.setType(type);
+            logger.debug("parse message type={}", type);
+            index += MSG_TYPE_LEN;
+            // request id
+            String requestId = SocketUtil.bytesToHexString(msgBytes, index, MSG_REQUEST_ID_LEN);
+            message.setRequestId(requestId);
+            logger.debug("parse message requestId={}", requestId);
+            index += MSG_REQUEST_ID_LEN;
+            // resp status
+            if (type == MSG_TYPE_RESP) {
+                int status = msgBytes[index] & 0xFF;
+                ((MessageResp)message).setStatus(status);
+                logger.debug("parse message status={}", status);
+                index += MSG_STATUS_LEN;
+            }
+            // len
+            int len = byteArrayToInt(msgBytes, index, MSG_TLV_PART_LEN);
+            message.setLen(len);
+            logger.debug("parse message len={}", len);
+            index += MSG_TLV_PART_LEN;
+            // tlv
+            List<MessageTlv> tlvList = parseTlvList(msgBytes, index, len);
+            message.setTlvList(tlvList);
+            return message;
+        } catch (Exception e) {
+            throw new RuntimeException("Parse message Failed.", e);
+        }
     }
 
     /**
@@ -55,6 +78,9 @@ public class MessageUtil {
      * @return 字节数组
      */
     public static byte[] convertMessageToByteArray(Message message) {
+        if (message == null) {
+            return null;
+        }
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             // type
             if (message.getType() != null) {
@@ -74,12 +100,7 @@ public class MessageUtil {
                 if (msgRsp.getStatus() != null) {
                     baos.write(msgRsp.getStatus());
                 } else {
-                    baos.write(MessageConstant.RESP_STATUS_OTHER_ERROR);
-                }
-                if (msgRsp.getRequestType() != null) {
-                    baos.write(msgRsp.getRequestType());
-                } else {
-                    baos.write(0);
+                    baos.write(RESP_STATUS_OTHER_ERROR);
                 }
             }
             // len
@@ -106,6 +127,9 @@ public class MessageUtil {
      * @return 字节数组
      */
     public static byte[] convertTlvListToByteArray(List<MessageTlv> tlvList) {
+        if (tlvList == null) {
+            return null;
+        }
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             for (MessageTlv tlv : tlvList) {
                 baos.write(tlv.getTag().byteValue());
@@ -143,16 +167,22 @@ public class MessageUtil {
         while (index < offset + len ) {
             MessageTlv tlv = new MessageTlv();
             // tlv tag
-            tlv.setTag(msgBytes[index] & 0xff);
-            index += MessageConstant.MSG_TLV_TAG_LEN;
+            int tag = msgBytes[index] & 0xff;
+            tlv.setTag(tag);
+            logger.debug("parse message tlv tag={}", tag);
+            index += MSG_TLV_TAG_LEN;
             // tlv len (value)
             int valueLen = msgBytes[index] & 0xff;
-            index += MessageConstant.MSG_TLV_VALUE_LEN;
+            index += MSG_TLV_VALUELEN_LEN;
             tlv.setLength(valueLen);
+            logger.debug("parse message tlv len={}", valueLen);
             // tlv value
-            tlv.setValue(SocketUtil.subBytes(msgBytes, index, valueLen));
+            byte[] value = SocketUtil.subBytes(msgBytes, index, valueLen);
+            tlv.setValue(value);
             index += valueLen;
-
+            if (logger.isDebugEnabled()) {
+                logger.debug("Parsed message tlv value(HEX)={}", SocketUtil.bytesToHexString(value));
+            }
             tlvList.add(tlv);
         }
         return tlvList;
@@ -283,63 +313,4 @@ public class MessageUtil {
         }
         return bytes;
     }
-
-    /**
-     * 判断两个ipv6地址是否相同（针对同一个ipv6有多种不同形式）
-     * @param ip1 ip1
-     * @param ip2 ip2
-     * @return 是否相同
-     */
-    public static boolean isSameIpv6(String ip1, String ip2) {
-        if (StringUtils.isNotEmpty(ip1) && StringUtils.isNotEmpty(ip2)) {
-            return padIpv6(ip1).equals(padIpv6(ip2));
-        }
-        return false;
-    }
-
-    /**
-     * 将ipv6补充为完整地址
-     */
-    public static String padIpv6(String ipv6) {
-        String[] split = ipv6.split(":");
-        int empty = -1;
-        for (int i = 0; i < split.length; i++) {
-            String s = split[i];
-            if (s.length() == 0 && empty ==-1) {
-                empty = i;
-            } else if (s.length() < 4){
-                StringBuilder sb = new StringBuilder(4);
-                for (int j = 0; j < 4 - s.length(); j++) {
-                    sb.append('0');
-                }
-                sb.append(s);
-                split[i] = sb.toString();
-            }
-        }
-        if (empty != -1) {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < 8 - split.length + 1; i++){
-                sb.append("0000:");
-            }
-            split[empty] = sb.substring(0, sb.length() - 1);
-        }
-        return String.join(":", split);
-    }
-
-    /**
-     * 判断地址是否ipv6
-     */
-    public static boolean isIpv6(String host) {
-        try {
-            // v6地址补齐
-            InetAddress inetAddress = InetAddress.getByName(host);
-            if (inetAddress instanceof java.net.Inet6Address) {
-                return true;
-            }
-        } catch (UnknownHostException e) {
-            logger.warn("未知的ip地址", e);
-        }
-        return false;
-    }
-
 }

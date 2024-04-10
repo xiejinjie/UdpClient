@@ -70,9 +70,10 @@ public class MessageConstant {
      */
     public static final int MSG_TYPE_LEN = 1;
     public static final int MSG_REQUEST_ID_LEN = 4;
+    public static final int MSG_STATUS_LEN = 1;
     public static final int MSG_TLV_PART_LEN = 2;
     public static final int MSG_TLV_TAG_LEN = 1;
-    public static final int MSG_TLV_VALUE_LEN = 1;
+    public static final int MSG_TLV_VALUELEN_LEN = 1;
 
 
     /*

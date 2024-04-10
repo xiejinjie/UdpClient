@@ -27,7 +27,7 @@ public class AppUI extends Application {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("UdpClientView.fxml"));
             // 创建布局
-            Scene scene = new Scene(loader.load() , 500, 480);
+            Scene scene = new Scene(loader.load() , 500, 520);
             primaryStage.setScene(scene);
             primaryStage.setTitle("UdpClient");
             primaryStage.setResizable(false);
